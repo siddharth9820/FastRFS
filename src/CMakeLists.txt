@@ -4,14 +4,15 @@ OPTION(BUILD_STATIC "build static" OFF)
 OPTION(BUILD_SHARED "build shared" ON)
 file(GLOB SOURCES *.cpp)
 
-add_definitions(-std=c++14 -g -O3 -Wall)
+add_definitions(-std=c++14 -g -O3 -Wall -fopenmp)
 include_directories("../../install/include"
                     "../../install/include/phylonaut")
 link_directories("../../install/lib")
 
 if (BUILD_SHARED)
 	add_executable(FastRFS ${SOURCES} FastRFS.cpp)
-	target_link_libraries(FastRFS phylokit phylonaut)
+	find_package(OpenMP)
+	target_link_libraries(FastRFS phylokit phylonaut OpenMP::OpenMP_CXX)
 
 	INCLUDE_DIRECTORIES("boost/" )
 	install(TARGETS FastRFS

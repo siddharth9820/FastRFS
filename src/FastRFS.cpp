@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
   Logger::enable("PROGRESS");
 
   Config conf;
+  conf.matrix=false;
 
   for(int i = 1; i < argc; i++) {
     if (string(argv[i]) == "-i" || string(argv[i]) == "--input") {
@@ -125,6 +126,9 @@ int main(int argc, char** argv) {
 
     if (string(argv[i]) == "--profile") {
       conf.profile="profile";
+    }
+    if (string(argv[i]) == "--matrix"){
+      conf.matrix=true;
     }
   }
 

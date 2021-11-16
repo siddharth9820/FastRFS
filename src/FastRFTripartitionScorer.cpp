@@ -6,6 +6,7 @@
 #include <limits>
 #include <fstream>
 #include <cmath>
+#include <omp.h>
 
 bool FastRFTripartitionScorer::better(double newscore, double oldscore) {
   return newscore > oldscore;
@@ -34,6 +35,7 @@ void FastRFTripartitionScorer::setup(Config& conf, vector<Clade>& clades)
 
   INFO << "Making possibilities lists\n";
 
+  double start = omp_get_wtime();
 
   int n = 0;
   for (const Clade& clade : clades) {
@@ -42,6 +44,7 @@ void FastRFTripartitionScorer::setup(Config& conf, vector<Clade>& clades)
     BitVectorFixed& bvf_b1 = (*(possibleB1.emplace(clade, weights.size()).first)).second;
     BitVectorFixed& bvf_b2 = (*(possibleB2.emplace(clade, weights.size()).first)).second;
     
+    #pragma omp parallel for
     for (unsigned int i = 0; i < bipartitions.size(); i++) {
       const Bipartition& bp = *(bipartitions[i]);
       if (clade.contains(bp.a1) && clade.overlap(bp.a2).size() == 0) {
@@ -57,12 +60,16 @@ void FastRFTripartitionScorer::setup(Config& conf, vector<Clade>& clades)
 	bvf_b2.set(i);
       }
     }
+
     n++;
     if (n%1000 == 0 || n == clades.size()) {
       INFO << "prepared " << n << "/" << clades.size() <<  endl;
     }
     
   }
+
+  double end = omp_get_wtime();
+  INFO << "Time taken to make possibilities list : "<< end-start << " s" << endl; 
 }
 
 void FastRFTripartitionScorer::addSourceTree(string tree) {
